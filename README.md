@@ -67,55 +67,67 @@ Departmental breakdown, employee counts, and distribution reports.
 
 ```mermaid
 flowchart TD
+    %% -------------------------------------------------------------
+    %% SUBGRAPH DEFINITIONS
+    %% -------------------------------------------------------------
     subgraph Client ["Frontend (React + TypeScript)"]
-        UI[User Browser / React App]
-        AuthCtx[Auth Context & JWT Token]
-        Dash[Role-Based Dashboard]
-        ChatUI[Project Chat & Team Panel]
-        NotifCenter[Notification Center Bell]
+        UI["User Browser / React App"]
+        AuthCtx["Auth Context & JWT Token"]
+        Dash["Role-Based Dashboard"]
+        ChatUI["Project Chat & Team Panel"]
+        NotifCenter["Notification Center Bell"]
     end
 
     subgraph Security ["Security & Role Validation"]
-        Filter[JwtAuthenticationFilter]
-        PreAuth[@PreAuthorize Checks]
+        Filter["JwtAuthenticationFilter"]
+        PreAuth["@PreAuthorize Checks"]
     end
 
     subgraph Backend ["Backend (Spring Boot 3 REST API)"]
-        AuthCtrl[AuthController]
-        EmpCtrl[EmployeeController]
-        ProjCtrl[ProjectController]
-        TaskCtrl[TaskController]
-        NotifCtrl[NotificationController]
-        ChatCtrl[ChatController]
+        AuthCtrl["AuthController"]
+        EmpCtrl["EmployeeController"]
+        ProjCtrl["ProjectController"]
+        TaskCtrl["TaskController"]
+        NotifCtrl["NotificationController"]
+        ChatCtrl["ChatController"]
         
-        ProjSvc[ProjectServiceImpl]
-        TaskSvc[TaskServiceImpl]
-        NotifSvc[NotificationServiceImpl]
+        ProjSvc["ProjectServiceImpl"]
+        TaskSvc["TaskServiceImpl"]
+        NotifSvc["NotificationServiceImpl"]
     end
 
     subgraph Database ["Persistence Layer (MySQL Database)"]
-        DB[(MySQL 8.0+ Database)]
+        DB[("MySQL 8.0+ Database")]
     end
 
-    UI -->|1. Submit Login Credentials| AuthCtrl
-    AuthCtrl -->|Verify Hash & Roles| DB
-    DB -->|Return User Profile & Claims| AuthCtrl
-    AuthCtrl -->|JWT Token + Role + ID| AuthCtx
+    %% -------------------------------------------------------------
+    %% FLOW CONNECTIONS
+    %% -------------------------------------------------------------
+    %% Authentication Phase
+    UI -->|"1. Submit Login Credentials"| AuthCtrl
+    AuthCtrl -->|"Verify Hash & Roles"| DB
+    DB -->|"Return User Profile & Claims"| AuthCtrl
+    AuthCtrl -->|"JWT Token + Role + ID"| AuthCtx
 
-    AuthCtx -->|2. Authenticated Requests| Filter
+    %% Request Security Phase
+    AuthCtx -->|"2. Authenticated Requests"| Filter
     Filter --> PreAuth
-    PreAuth -->|3. Route API Calls| Backend
+    PreAuth -->|"3. Route API Calls"| Backend
 
+    %% Controller to Service
     ProjCtrl --> ProjSvc
     TaskCtrl --> TaskSvc
     ChatCtrl --> ProjSvc
 
-    TaskSvc -->|Status = COMPLETED| ProjSvc
-    ProjSvc -->|Calculate Progress %| DB
-    TaskSvc -->|Generate Trigger Notification| NotifSvc
+    %% Business Operations & Database Updates
+    TaskSvc -->|"Status = COMPLETED"| ProjSvc
+    ProjSvc -->|"Calculate Progress %"| DB
+    TaskSvc -->|"Generate Trigger Notification"| NotifSvc
 
-    NotifSvc -->|Persist Notification| DB
-    DB -->|Fetch Updates via Polling| NotifCenter
+    %% Notifications Phase
+    NotifSvc -->|"Persist Notification"| DB
+    DB -->|"Fetch Updates via Polling"| NotifCenter
+
 ```
 
 ---
