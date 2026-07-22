@@ -1,0 +1,10 @@
+import { Navigate, Outlet } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
+
+export default function AdminRoute() {
+  const { role } = useAuth()
+  if (role !== 'ADMIN') {
+    return <Navigate to="/unauthorized" replace />
+  }
+  return <Outlet />
+}
