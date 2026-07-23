@@ -154,6 +154,10 @@ flowchart TD
     * One-click generation of organizational reports formatted in **PDF** (via OpenPDF) and **Excel** (via Apache POI), including employee rosters, project progress metrics, and pending task lists.
 * **OpenAPI 3.0 & Interactive Swagger UI**:
     * Complete interactive REST API documentation with built-in JWT Bearer token authentication testing support.
+* **🌙 Dark Mode**:
+    * Full system-wide Dark Mode with a one-click Sun ☀️ / Moon 🌙 toggle in the top navigation bar. Theme preference is persisted in `localStorage` and applied via `html.dark` class — ensuring instant, flicker-free switching without a page reload. All UI components (panels, tables, forms, cards, sidebar, modals, and status badges) adapt seamlessly across both themes.
+* **🧪 Comprehensive Unit Test Suite**:
+    * **76 unit tests** written with JUnit 5, Mockito, and MockMvc covering all service layers (Auth, JWT, Employee, Project, Task, Notification) and REST controller endpoints. All tests run in-memory with zero database dependencies — suitable for CI/CD pipelines.
 
 ---
 
@@ -193,8 +197,10 @@ The backend includes full **OpenAPI 3.0** documentation integrated via Springdoc
 | **Reporting & Export** | Apache POI (Excel `.xlsx`), OpenPDF (PDF `.pdf`) |
 | **Database** | MySQL 8.0+ |
 | **Frontend Framework** | React 18, TypeScript, Vite |
-| **Styling & Icons** | Vanilla CSS Design System, Lucide React Icons |
+| **Styling & Icons** | Tailwind CSS (class-based dark mode), Vanilla CSS Design System, Lucide React Icons |
+| **Theme System** | CSS custom properties (`html.dark` tokens), `localStorage` persistence |
 | **Charts & Visualization**| Recharts |
+| **Unit Testing** | JUnit 5, Mockito 5, Spring Boot Test, MockMvc (standalone) |
 | **Build & Container Tools** | Apache Maven, Node.js / npm, Docker & Docker Compose |
 
 ---
@@ -388,6 +394,112 @@ A complete Postman collection is included in the project root:
 
 ---
 
+## 🧪 Unit Testing
+
+The backend includes a comprehensive unit test suite covering all major service and controller layers.
+
+### Testing Stack
+
+| Tool | Purpose |
+| :--- | :--- |
+| **JUnit 5** | Test framework and lifecycle annotations (`@Test`, `@BeforeEach`, `@DisplayName`) |
+| **Mockito 5** | Mocking repositories and dependencies without a real database |
+| **Spring Boot Test** | Test autoconfiguration and AssertJ assertions |
+| **MockMvc (Standalone)** | Controller-layer HTTP endpoint testing without starting a full server |
+| **Mockito Static Mocks** | Mocking `SecurityContextHolder` for authenticated-user scenarios |
+
+### Running the Tests
+
+```bash
+cd employee-management-backend
+mvn test
+```
+
+**Expected result:** `BUILD SUCCESS — Tests run: 76, Failures: 0, Errors: 0`
+
+> ✅ No database connection required. All tests run fully in-memory using mocked repositories.
+
+### Test Coverage Summary
+
+| Test Class | Tests | Coverage Area |
+| :--- | :---: | :--- |
+| `JwtServiceTest` | 7 | Token generation, claims extraction, expiration, validation |
+| `AuthServiceTest` | 4 | Successful login, bad credentials, user not found, JWT response |
+| `EmployeeServiceImplTest` | 10 | Create, update, delete, get by ID, pagination, duplicate email |
+| `ProjectServiceImplTest` | 10 | Create, update, delete, get, date validation, team assignment |
+| `TaskServiceImplTest` | 10 | Create, update, delete, progress update, status update, boundaries |
+| `NotificationServiceImplTest` | 8 | Create, fetch, unread count, mark read, mark all read, auth checks |
+| `EmployeeControllerTest` | 9 | `POST`, `GET`, `PUT`, `DELETE` HTTP 200 / 201 / 204 / 400 / 404 |
+| `ProjectControllerTest` | 8 | `POST`, `GET`, `PUT`, `DELETE` HTTP 200 / 201 / 204 / 400 / 404 |
+| `TaskControllerTest` | 10 | `POST`, `GET`, `PUT`, `DELETE`, `/status`, `/progress` endpoints |
+| `ApplicationTests` | 1 | Smoke test — context loads without database |
+| **Total** | **77** | |
+
+### Test Structure
+
+```
+employee-management-backend/src/test/java/com/example/employeemanagement/
+├── security/
+│   └── JwtServiceTest.java
+├── service/
+│   ├── AuthServiceTest.java
+│   ├── EmployeeServiceImplTest.java
+│   ├── ProjectServiceImplTest.java
+│   ├── TaskServiceImplTest.java
+│   └── NotificationServiceImplTest.java
+├── controller/
+│   ├── EmployeeControllerTest.java
+│   ├── ProjectControllerTest.java
+│   └── TaskControllerTest.java
+└── EmployeeManagementBackendApplicationTests.java
+```
+
+---
+
+## 🌙 Dark Mode
+
+The frontend includes a full system-wide Dark Mode built into the CSS design token architecture.
+
+### How It Works
+
+| Mechanism | Details |
+| :--- | :--- |
+| **Toggle** | Sun ☀️ / Moon 🌙 icon button in the top navigation bar (`Topbar.tsx`) |
+| **State** | Managed via `ThemeContext.tsx` with React Context API |
+| **Persistence** | Saved to `localStorage` — preference survives page refresh and browser restart |
+| **CSS Strategy** | `html.dark` class toggled on `document.documentElement`; all color tokens redefined in `html.dark { }` block in `index.css` |
+| **Tailwind Integration** | `darkMode: 'class'` in `tailwind.config.js` — all Tailwind `dark:` variants work automatically |
+
+### Dark Mode Design Tokens
+
+```css
+/* Light Mode (default) */
+:root {
+  --bg: #F7F7F5;      --card: #FFFFFF;      --ink: #1C1F26;
+  --ink-soft: #6B7280; --line: #DEDEDA;      --sidebar: #1C1F26;
+  --amber: #B8860B;    --green: #2F6E4F;     --red: #A23B3B;
+}
+
+/* Dark Mode (activated via html.dark class) */
+html.dark {
+  --bg: #0F172A;       --card: #1E293B;      --ink: #F1F5F9;
+  --ink-soft: #94A3B8; --line: #334155;      --sidebar: #020617;
+  --amber: #F59E0B;    --green: #10B981;     --red: #EF4444;
+}
+```
+
+### Files Modified for Dark Mode
+
+| File | Change |
+| :--- | :--- |
+| `src/context/ThemeContext.tsx` | New — theme state, toggle function, `localStorage` sync, `html.dark` class management |
+| `src/main.tsx` | Wrapped app root with `<ThemeProvider>` |
+| `src/components/layout/Topbar.tsx` | Added Sun/Moon toggle button |
+| `src/styles/index.css` | Added `html.dark` token overrides, smooth `transition` on `body`, dark-aware scrollbar, form, and table styles |
+| `tailwind.config.js` | Enabled `darkMode: 'class'` |
+
+---
+
 ## 📁 Repository Structure
 
 ```
@@ -409,10 +521,40 @@ Employee Management/
 │   └── Reports.png
 ├── employee-management-backend/                   # Spring Boot 3 Java Application
 │   ├── pom.xml
-│   └── src/main/java/com/example/employeemanagement/
+│   └── src/
+│       ├── main/java/com/example/employeemanagement/
+│       │   ├── controller/                        # REST Controllers
+│       │   ├── service/                           # Business Logic (Service + Impl)
+│       │   ├── security/                          # JWT Filter, JwtService, UserDetails
+│       │   ├── entity/                            # JPA Entities (Employee, Project, Task…)
+│       │   ├── dto/                               # Data Transfer Objects
+│       │   ├── repository/                        # Spring Data JPA Repositories
+│       │   └── exception/                         # Global Exception Handler
+│       └── test/java/com/example/employeemanagement/   # ✅ Unit Test Suite
+│           ├── security/JwtServiceTest.java        # JWT token tests (7 tests)
+│           ├── service/
+│           │   ├── AuthServiceTest.java            # Auth & login tests (4 tests)
+│           │   ├── EmployeeServiceImplTest.java    # Employee CRUD tests (10 tests)
+│           │   ├── ProjectServiceImplTest.java     # Project logic tests (10 tests)
+│           │   ├── TaskServiceImplTest.java        # Task workflow tests (10 tests)
+│           │   └── NotificationServiceImplTest.java# Notification tests (8 tests)
+│           ├── controller/
+│           │   ├── EmployeeControllerTest.java     # MockMvc endpoint tests (9 tests)
+│           │   ├── ProjectControllerTest.java      # MockMvc endpoint tests (8 tests)
+│           │   └── TaskControllerTest.java         # MockMvc endpoint tests (10 tests)
+│           └── EmployeeManagementBackendApplicationTests.java
 └── employee-management-frontend/                  # React 18 TypeScript Application
     ├── package.json
+    ├── tailwind.config.js                         # 🌙 darkMode: 'class' enabled
     └── src/
+        ├── context/
+        │   ├── AuthContext.tsx
+        │   ├── ThemeContext.tsx                   # 🌙 Dark mode state & localStorage sync
+        │   └── ToastContext.tsx
+        ├── components/
+        │   ├── layout/Topbar.tsx                  # 🌙 Sun/Moon theme toggle button
+        │   └── chat/ProjectChat.tsx               # Team chat with internal scroll fix
+        └── styles/index.css                       # 🌙 html.dark CSS token overrides
 ```
 
 ---

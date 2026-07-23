@@ -2,11 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light Mode Design Tokens (Default) */
 :root {
   --ink: #1C1F26;
   --ink-soft: #6B7280;
   --bg: #F7F7F5;
   --card: #FFFFFF;
+  --card-hover: #F0F0EC;
   --line: #DEDEDA;
   --line-strong: #1C1F26;
   --amber: #B8860B;
@@ -16,6 +18,24 @@
   --red: #A23B3B;
   --red-bg: #FBEAEA;
   --sidebar: #1C1F26;
+}
+
+/* Dark Mode Design Tokens (Toggled via html.dark) */
+html.dark {
+  --ink: #F1F5F9;
+  --ink-soft: #94A3B8;
+  --bg: #0F172A;
+  --card: #1E293B;
+  --card-hover: #334155;
+  --line: #334155;
+  --line-strong: #64748B;
+  --amber: #F59E0B;
+  --amber-bg: #3B2D11;
+  --green: #10B981;
+  --green-bg: #064E3B;
+  --red: #EF4444;
+  --red-bg: #451A1A;
+  --sidebar: #020617;
 }
 
 * { box-sizing: border-box; }
@@ -28,6 +48,7 @@ body {
   color: var(--ink);
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
@@ -50,7 +71,7 @@ a { text-decoration: none; color: inherit; }
 
 .page-title { font-size: 22px; font-weight: 700; margin: 0 0 20px; color: var(--ink); }
 
-.panel { border: 1px solid var(--line); background: var(--card); padding: 20px; }
+.panel { border: 1px solid var(--line); background: var(--card); padding: 20px; transition: background-color 0.2s ease, border-color 0.2s ease; }
 
 .status-tag {
   font-family: 'IBM Plex Mono', monospace;
@@ -81,11 +102,11 @@ table.ledger th {
 }
 table.ledger td { padding: 11px 10px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: middle; }
 table.ledger tr:last-child td { border-bottom: none; }
-table.ledger tbody tr:hover { background: #FAFAF8; }
+table.ledger tbody tr:hover { background: var(--card-hover); }
 
 .btn {
   background: var(--ink);
-  color: #fff;
+  color: var(--card);
   border: none;
   padding: 9px 16px;
   font-size: 12.5px;
@@ -97,12 +118,12 @@ table.ledger tbody tr:hover { background: #FAFAF8; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: opacity .15s ease;
+  transition: opacity .15s ease, background-color 0.2s ease, color 0.2s ease;
 }
 .btn:hover { opacity: .85; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
-.btn.danger { background: var(--red); }
+.btn.danger { background: var(--red); color: #FFFFFF; }
 .btn.amber { background: var(--amber); color: #1C1F26; }
 
 .field-label {
@@ -118,15 +139,22 @@ table.ledger tbody tr:hover { background: #FAFAF8; }
 .field-input {
   width: 100%;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--card);
   padding: 9px 11px;
   font-size: 13.5px;
   font-family: 'IBM Plex Sans', sans-serif;
   color: var(--ink);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 .field-input:focus { border-color: var(--ink); outline: none; }
 .field-error { border-color: var(--red) !important; }
 .field-error-msg { color: var(--red); font-size: 11.5px; margin-top: 4px; }
+
+/* Support select option styling in dark mode */
+select.field-input option {
+  background-color: var(--card);
+  color: var(--ink);
+}
 
 .chip {
   padding: 7px 14px;
@@ -138,4 +166,4 @@ table.ledger tbody tr:hover { background: #FAFAF8; }
   white-space: nowrap;
 }
 .chip:last-child { border-right: none; }
-.chip.active { background: var(--ink); color: #fff; }
+.chip.active { background: var(--ink); color: var(--card); }
