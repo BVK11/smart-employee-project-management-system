@@ -1,6 +1,21 @@
 # Smart Employee & Project Management System
 
-A full-stack, enterprise-grade **Project & Employee Management Portal** built using **Spring Boot 3 (Java 25)**, **Spring Security with JWT**, **MySQL**, and a modern **React (TypeScript)** frontend with **Vite** and **Tailwind CSS**.
+A full-stack, enterprise-grade **Project & Employee Management Portal** built using **Spring Boot 3 (Java 25)**, **Spring Security with JWT**, **MySQL**, and a modern **React (TypeScript)** frontend with **Vite** and **Tailwind CSS**. It streamlines employee administration, project/task tracking, team collaboration, and automated reporting through a secure, role-based dashboard experience.
+
+---
+
+## 🚀 Project Highlights
+
+- ✅ JWT Authentication & Role-Based Access Control
+- ✅ Employee & Project Management
+- ✅ Task Assignment & Progress Tracking
+- ✅ Team Chat & Collaboration
+- ✅ Real-Time Notifications
+- ✅ PDF & Excel Report Generation
+- ✅ Interactive Swagger API Documentation
+- ✅ Docker & Docker Compose Support
+- ✅ Dark Mode
+- ✅ Comprehensive Unit Testing (77 Tests)
 
 ---
 
@@ -63,7 +78,7 @@ Departmental breakdowns, employee statistics, and downloadable **PDF** & **Excel
 
 ---
 
-## 🔀 System Workflow Diagram
+## 🔀 Detailed System Architecture
 
 ```mermaid
 flowchart TD
@@ -138,26 +153,35 @@ flowchart TD
 
 ## ✨ Features Highlight
 
-* **Role-Based Access Control (RBAC)**:
-    * **Admin**: Complete access to Employee Directory, Project Management, Task Allocation, Reports, System Notifications, and Data Exports.
-    * **Employee**: Restricted to assigned Projects, assigned Tasks, Project Team Chat, and personal Notifications.
-* **Automatic Database Initialization & Seeding**:
-    * On initial startup, `DatabaseSeeder.java` populates 1 System Administrator account and 20+ departmentally distributed employees (HR, IT, Backend, Frontend, QA, DevOps) along with sample projects and tasks.
-* **Dynamic Project Progress Calculation**:
-    * Project progress (%) is dynamically calculated in the backend formula:
-      $$\text{Progress} = \left( \frac{\text{Completed Tasks}}{\text{Total Tasks}} \right) \times 100$$
-* **Real-Time Notification Center**:
-    * Bell icon with unread counter badge. Automatic notifications triggered upon Task Completion, Task Assignment, Project Creation, and Team Assignment.
-* **Project Team Chat Room**:
-    * Dedicated team chat room for each project with real-time message polling, team member roster, and member profile summaries.
-* **Automated PDF & Excel Report Exports**:
-    * One-click generation of organizational reports formatted in **PDF** (via OpenPDF) and **Excel** (via Apache POI), including employee rosters, project progress metrics, and pending task lists.
-* **OpenAPI 3.0 & Interactive Swagger UI**:
-    * Complete interactive REST API documentation with built-in JWT Bearer token authentication testing support.
-* **🌙 Dark Mode**:
-    * Full system-wide Dark Mode with a one-click Sun ☀️ / Moon 🌙 toggle in the top navigation bar. Theme preference is persisted in `localStorage` and applied via `html.dark` class — ensuring instant, flicker-free switching without a page reload. All UI components (panels, tables, forms, cards, sidebar, modals, and status badges) adapt seamlessly across both themes.
-* **🧪 Comprehensive Unit Test Suite**:
-    * **76 unit tests** written with JUnit 5, Mockito, and MockMvc covering all service layers (Auth, JWT, Employee, Project, Task, Notification) and REST controller endpoints. All tests run in-memory with zero database dependencies — suitable for CI/CD pipelines.
+**Role-Based Access Control (RBAC)**
+- **Admin** — full access to Employee Directory, Project Management, Task Allocation, Reports, System Notifications, and Data Exports.
+- **Employee** — restricted to assigned Projects, assigned Tasks, Project Team Chat, and personal Notifications.
+
+**Automatic Database Initialization & Seeding**
+- `DatabaseSeeder.java` seeds 1 System Administrator account and 20+ departmentally distributed employees (HR, IT, Backend, Frontend, QA, DevOps) along with sample projects and tasks on first startup.
+
+**Dynamic Project Progress Calculation**
+- Project progress (%) is calculated automatically in the backend:
+  $$\text{Progress} = \left( \frac{\text{Completed Tasks}}{\text{Total Tasks}} \right) \times 100$$
+
+**Real-Time Notification Center**
+- Bell icon with unread counter badge.
+- Automatic notifications on Task Completion, Task Assignment, Project Creation, and Team Assignment.
+
+**Project Team Chat Room**
+- Dedicated chat room per project with real-time message polling, team member roster, and profile summaries.
+
+**Automated PDF & Excel Report Exports**
+- One-click organizational reports in **PDF** (via OpenPDF) and **Excel** (via Apache POI), including employee rosters, project progress metrics, and pending task lists.
+
+**OpenAPI 3.0 & Interactive Swagger UI**
+- Complete interactive REST API documentation with built-in JWT Bearer token authentication testing support.
+
+**🌙 Dark Mode**
+- System-wide Dark Mode with a one-click Sun ☀️ / Moon 🌙 toggle, persisted across sessions.
+
+**🧪 Comprehensive Unit Test Suite**
+- **77 unit tests** (JUnit 5, Mockito, MockMvc) covering all service layers and REST controller endpoints, with zero database dependency — CI/CD ready.
 
 ---
 
@@ -398,6 +422,17 @@ A complete Postman collection is included in the project root:
 
 The backend includes a comprehensive unit test suite covering all major service and controller layers.
 
+### ✅ Test Highlights
+
+- **77 Total Unit Tests Implemented**
+- JUnit 5
+- Mockito
+- MockMvc
+- Service Layer Testing
+- Controller Layer Testing
+- JWT & Authentication Testing
+- No database dependency during testing
+
 ### Testing Stack
 
 | Tool | Purpose |
@@ -415,7 +450,7 @@ cd employee-management-backend
 mvn test
 ```
 
-**Expected result:** `BUILD SUCCESS — Tests run: 76, Failures: 0, Errors: 0`
+**Expected result:** `BUILD SUCCESS — Tests run: 77, Failures: 0, Errors: 0`
 
 > ✅ No database connection required. All tests run fully in-memory using mocked repositories.
 
@@ -460,43 +495,10 @@ employee-management-backend/src/test/java/com/example/employeemanagement/
 
 The frontend includes a full system-wide Dark Mode built into the CSS design token architecture.
 
-### How It Works
-
-| Mechanism | Details |
-| :--- | :--- |
-| **Toggle** | Sun ☀️ / Moon 🌙 icon button in the top navigation bar (`Topbar.tsx`) |
-| **State** | Managed via `ThemeContext.tsx` with React Context API |
-| **Persistence** | Saved to `localStorage` — preference survives page refresh and browser restart |
-| **CSS Strategy** | `html.dark` class toggled on `document.documentElement`; all color tokens redefined in `html.dark { }` block in `index.css` |
-| **Tailwind Integration** | `darkMode: 'class'` in `tailwind.config.js` — all Tailwind `dark:` variants work automatically |
-
-### Dark Mode Design Tokens
-
-```css
-/* Light Mode (default) */
-:root {
-  --bg: #F7F7F5;      --card: #FFFFFF;      --ink: #1C1F26;
-  --ink-soft: #6B7280; --line: #DEDEDA;      --sidebar: #1C1F26;
-  --amber: #B8860B;    --green: #2F6E4F;     --red: #A23B3B;
-}
-
-/* Dark Mode (activated via html.dark class) */
-html.dark {
-  --bg: #0F172A;       --card: #1E293B;      --ink: #F1F5F9;
-  --ink-soft: #94A3B8; --line: #334155;      --sidebar: #020617;
-  --amber: #F59E0B;    --green: #10B981;     --red: #EF4444;
-}
-```
-
-### Files Modified for Dark Mode
-
-| File | Change |
-| :--- | :--- |
-| `src/context/ThemeContext.tsx` | New — theme state, toggle function, `localStorage` sync, `html.dark` class management |
-| `src/main.tsx` | Wrapped app root with `<ThemeProvider>` |
-| `src/components/layout/Topbar.tsx` | Added Sun/Moon toggle button |
-| `src/styles/index.css` | Added `html.dark` token overrides, smooth `transition` on `body`, dark-aware scrollbar, form, and table styles |
-| `tailwind.config.js` | Enabled `darkMode: 'class'` |
+- One-click Sun ☀️ / Moon 🌙 toggle in the top navigation bar
+- Theme preference stored in `localStorage` — survives page refresh and browser restart
+- Fully supported across every UI component (panels, tables, forms, cards, sidebar, modals, status badges)
+- Tailwind CSS class-based implementation (`darkMode: 'class'`) for instant, flicker-free switching without a page reload
 
 ---
 
@@ -504,57 +506,13 @@ html.dark {
 
 ```
 Employee Management/
-├── database_schema.sql                            # MySQL DDL Schema & Data Seed Script
-├── docker-compose.yaml                            # Multi-container Docker configuration
-├── Employee_Management_System.postman_collection.json  # Postman REST API Collection
-├── README.md                                      # Project Documentation & Setup Guide
-├── images/                                        # Interface Screenshots & Workflow Diagrams
-│   ├── Flow Chart.png
-│   ├── Login.png
-│   ├── Register.png
-│   ├── admin.png
-│   ├── employee.png
-│   ├── employees.png
-│   ├── projects.png
-│   ├── Tasks.png
-│   ├── Team chat.png
-│   └── Reports.png
-├── employee-management-backend/                   # Spring Boot 3 Java Application
-│   ├── pom.xml
-│   └── src/
-│       ├── main/java/com/example/employeemanagement/
-│       │   ├── controller/                        # REST Controllers
-│       │   ├── service/                           # Business Logic (Service + Impl)
-│       │   ├── security/                          # JWT Filter, JwtService, UserDetails
-│       │   ├── entity/                            # JPA Entities (Employee, Project, Task…)
-│       │   ├── dto/                               # Data Transfer Objects
-│       │   ├── repository/                        # Spring Data JPA Repositories
-│       │   └── exception/                         # Global Exception Handler
-│       └── test/java/com/example/employeemanagement/   # ✅ Unit Test Suite
-│           ├── security/JwtServiceTest.java        # JWT token tests (7 tests)
-│           ├── service/
-│           │   ├── AuthServiceTest.java            # Auth & login tests (4 tests)
-│           │   ├── EmployeeServiceImplTest.java    # Employee CRUD tests (10 tests)
-│           │   ├── ProjectServiceImplTest.java     # Project logic tests (10 tests)
-│           │   ├── TaskServiceImplTest.java        # Task workflow tests (10 tests)
-│           │   └── NotificationServiceImplTest.java# Notification tests (8 tests)
-│           ├── controller/
-│           │   ├── EmployeeControllerTest.java     # MockMvc endpoint tests (9 tests)
-│           │   ├── ProjectControllerTest.java      # MockMvc endpoint tests (8 tests)
-│           │   └── TaskControllerTest.java         # MockMvc endpoint tests (10 tests)
-│           └── EmployeeManagementBackendApplicationTests.java
-└── employee-management-frontend/                  # React 18 TypeScript Application
-    ├── package.json
-    ├── tailwind.config.js                         # 🌙 darkMode: 'class' enabled
-    └── src/
-        ├── context/
-        │   ├── AuthContext.tsx
-        │   ├── ThemeContext.tsx                   # 🌙 Dark mode state & localStorage sync
-        │   └── ToastContext.tsx
-        ├── components/
-        │   ├── layout/Topbar.tsx                  # 🌙 Sun/Moon theme toggle button
-        │   └── chat/ProjectChat.tsx               # Team chat with internal scroll fix
-        └── styles/index.css                       # 🌙 html.dark CSS token overrides
+├── employee-management-backend/
+├── employee-management-frontend/
+├── images/
+├── database_schema.sql
+├── docker-compose.yaml
+├── Employee_Management_System.postman_collection.json
+└── README.md
 ```
 
 ---

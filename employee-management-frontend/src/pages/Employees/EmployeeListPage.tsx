@@ -14,8 +14,6 @@ import type { Employee } from '@/types/employee'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 
-const PAGE_SIZE = 10
-
 export default function EmployeeListPage() {
   const { role } = useAuth()
   const toast = useToast()
@@ -24,31 +22,40 @@ export default function EmployeeListPage() {
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
   const [pageNo, setPageNo] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(0)
+  const [totalElements, setTotalElements] = useState(0)
   const [keyword, setKeyword] = useState('')
   const [department, setDepartment] = useState('')
   const [status, setStatus] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const load = () => {
+  const load = (currentPage = pageNo, currentSize = pageSize) => {
     setLoading(true)
     const hasFilters = keyword || department || status
     const call = hasFilters
-      ? employeesApi.search({ keyword: keyword || undefined, department: department || undefined, status: status || undefined, page: pageNo, size: PAGE_SIZE, sortBy: 'id', sortDir: 'asc' })
-      : employeesApi.list({ page: pageNo, size: PAGE_SIZE, sortBy: 'id', sortDir: 'asc' })
+      ? employeesApi.search({ keyword: keyword || undefined, department: department || undefined, status: status || undefined, page: currentPage, size: currentSize, sortBy: 'id', sortDir: 'asc' })
+      : employeesApi.list({ page: currentPage, size: currentSize, sortBy: 'id', sortDir: 'asc' })
 
     call
       .then((res) => {
         setEmployees(res.content)
         setTotalPages(res.totalPages)
+        setTotalElements(res.totalElements ?? 0)
       })
       .catch((e) => toast.error(extractErrorMessage(e, 'Could not load employees.')))
       .finally(() => setLoading(false))
   }
 
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    setPageNo(0)
+    load(0, newSize)
+  }
+
   useEffect(() => {
-    load()
+    load(pageNo, pageSize)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageNo])
 
@@ -169,7 +176,14 @@ export default function EmployeeListPage() {
           </table>
         </div>
         <div className="px-4">
-          <Pagination pageNo={pageNo} totalPages={totalPages} onChange={setPageNo} />
+          <Pagination
+            pageNo={pageNo}
+            totalPages={totalPages}
+            onChange={setPageNo}
+            pageSize={pageSize}
+            onPageSizeChange={handlePageSizeChange}
+            totalElements={totalElements}
+          />
         </div>
       </div>
 
