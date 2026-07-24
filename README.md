@@ -8,7 +8,8 @@ A full-stack, enterprise-grade **Project & Employee Management Portal** built us
 
 - ✅ JWT Authentication & Role-Based Access Control
 - ✅ Employee & Project Management
-- ✅ Task Assignment & Progress Tracking
+- ✅ Task Assignment, Progress Tracking & Remarks
+- ✅ Search, Filtering & Sorting Across Employees, Projects & Tasks
 - ✅ Team Chat & Collaboration
 - ✅ Real-Time Notifications
 - ✅ PDF & Excel Report Generation
@@ -164,6 +165,15 @@ flowchart TD
 - Project progress (%) is calculated automatically in the backend:
   $$\text{Progress} = \left( \frac{\text{Completed Tasks}}{\text{Total Tasks}} \right) \times 100$$
 
+**Project Management**
+- Full create, update, and delete lifecycle for projects, with status (`ACTIVE`, `COMPLETED`, `ON_HOLD`), priority, and deadline tracking, plus team assignment.
+
+**Task Management**
+- Create and assign tasks to employees within a project, update status and progress, add remarks, and delete tasks as needed.
+
+**Search, Filtering & Sorting**
+- Employees, Projects, and Tasks can all be searched, filtered (by department, status, priority, or date), and sorted from their respective list views.
+
 **Real-Time Notification Center**
 - Bell icon with unread counter badge.
 - Automatic notifications on Task Completion, Task Assignment, Project Creation, and Team Assignment.
@@ -182,6 +192,24 @@ flowchart TD
 
 **🧪 Comprehensive Unit Test Suite**
 - **77 unit tests** (JUnit 5, Mockito, MockMvc) covering all service layers and REST controller endpoints, with zero database dependency — CI/CD ready.
+
+---
+
+## 🏗️ Architecture & Engineering Practices
+
+### Backend
+* **Layered Architecture** — clean separation across `controller/` (REST endpoints), `service/` (business logic), `repository/` (Spring Data JPA), `entity/` (JPA models), `dto/` (request/response contracts), `security/` (JWT filters & auth), and `exception/` (centralized error handling).
+* **DTO Pattern** — entities are never exposed directly; all API requests and responses flow through dedicated DTOs.
+* **Bean Validation** — `@Valid` / `@NotNull` / `@Email` style annotations on DTOs enforce input validation at the controller boundary, returning structured `400 Bad Request` errors on failure.
+* **Global Exception Handling** — a centralized `@ControllerAdvice` exception handler converts service-layer and validation errors into consistent JSON error responses.
+* **Logging** — key request flows, authentication attempts, and service operations are logged for traceability and debugging.
+
+### Frontend
+* **Responsive UI** — layouts adapt across desktop and mobile breakpoints using Tailwind CSS.
+* **Form Validation** — client-side validation (required fields, email/password formats) runs before API calls, with inline error messages.
+* **Error Handling** — failed API calls surface user-friendly toast/alert messages instead of silent failures.
+* **Loading Indicators** — spinners/skeleton states are shown during data fetches and form submissions.
+* **Notifications** — toast notifications confirm successful actions (create/update/delete) and surface real-time alerts via the Notification Center.
 
 ---
 
@@ -229,6 +257,82 @@ The backend includes full **OpenAPI 3.0** documentation integrated via Springdoc
 
 ---
 
+## 🗄️ Database Design & Relationships
+
+The schema (see [`database_schema.sql`](database_schema.sql)) models the following entities and relationships:
+
+```mermaid
+erDiagram
+    EMPLOYEE ||--o{ TASK : "assigned"
+    EMPLOYEE }o--o{ PROJECT : "member of"
+    PROJECT ||--o{ TASK : "contains"
+    EMPLOYEE ||--o{ NOTIFICATION : "receives"
+    EMPLOYEE ||--o{ CHAT_MESSAGE : "sends"
+    PROJECT ||--o{ CHAT_MESSAGE : "hosts"
+
+    EMPLOYEE {
+        bigint id PK
+        string name
+        string email
+        string password
+        string department
+        string designation
+        string role
+        double salary
+        date joining_date
+        string status
+    }
+
+    PROJECT {
+        bigint id PK
+        string name
+        string description
+        string status
+        string priority
+        date deadline
+        date created_date
+    }
+
+    TASK {
+        bigint id PK
+        bigint project_id FK
+        bigint employee_id FK
+        string title
+        string status
+        string priority
+        int progress
+        date deadline
+        string remarks
+    }
+
+    NOTIFICATION {
+        bigint id PK
+        bigint employee_id FK
+        string message
+        boolean is_read
+        datetime created_at
+    }
+
+    CHAT_MESSAGE {
+        bigint id PK
+        bigint project_id FK
+        bigint employee_id FK
+        string message
+        datetime sent_at
+    }
+```
+
+| Relationship | Type | Description |
+| :--- | :---: | :--- |
+| `Employee` → `Task` | One-to-Many | One employee can be assigned many tasks |
+| `Project` → `Task` | One-to-Many | One project contains many tasks |
+| `Employee` ↔ `Project` | Many-to-Many | Employees can be assigned to multiple projects, and each project has multiple team members (join table) |
+| `Employee` → `Notification` | One-to-Many | One employee can receive many notifications |
+| `Project` → `ChatMessage` | One-to-Many | One project chat room holds many messages |
+| `Task` → `Employee` | Many-to-One | Each task is assigned to a single responsible employee |
+
+---
+
 ## 🔑 Pre-Seeded Default Credentials
 
 All accounts come pre-configured via `DatabaseSeeder.java`.
@@ -260,18 +364,22 @@ All accounts come pre-configured via `DatabaseSeeder.java`.
 | **Auth** | `POST` | `/register` | Public | Register new employee user account |
 | **Dashboard** | `GET` | `/api/dashboard/admin` | `ADMIN` | Fetch overall KPIs, project completion rates, and task metrics |
 | **Dashboard** | `GET` | `/api/dashboard/employee/{id}` | `ADMIN`, `EMPLOYEE` | Fetch employee workload summary and pending tasks |
-| **Employees** | `GET` | `/api/employees` | `ADMIN` | List all employees with pagination (`page`, `size`) |
+| **Employees** | `GET` | `/api/employees` | `ADMIN` | List all employees with pagination, search, and sorting (`page`, `size`, `search`, `sortBy`, `sortDir`) |
 | **Employees** | `GET` | `/api/employees/{id}` | `ADMIN` | Get specific employee profile by ID |
 | **Employees** | `POST` | `/api/employees` | `ADMIN` | Create new employee record |
 | **Employees** | `PUT` | `/api/employees/{id}` | `ADMIN` | Update employee information |
 | **Employees** | `DELETE` | `/api/employees/{id}` | `ADMIN` | Delete employee record |
-| **Projects** | `GET` | `/api/projects` | `ADMIN` | List all projects in organization |
+| **Projects** | `GET` | `/api/projects` | `ADMIN` | List all projects with search and filtering by status, priority, and deadline |
 | **Projects** | `GET` | `/api/employee/projects` | `EMPLOYEE` | List projects assigned to logged-in employee |
 | **Projects** | `POST` | `/api/projects` | `ADMIN` | Create project & assign employee team members |
-| **Projects** | `PUT` | `/api/projects/{id}` | `ADMIN` | Update project details and assigned team |
-| **Tasks** | `GET` | `/api/employee/tasks` | `EMPLOYEE` | Get tasks assigned to logged-in employee |
+| **Projects** | `PUT` | `/api/projects/{id}` | `ADMIN` | Update project details, status, priority, deadline, and assigned team |
+| **Projects** | `DELETE` | `/api/projects/{id}` | `ADMIN` | Delete a project |
+| **Tasks** | `POST` | `/api/tasks` | `ADMIN` | Create a task and assign it to an employee within a project |
+| **Tasks** | `GET` | `/api/employee/tasks` | `EMPLOYEE` | Get tasks assigned to logged-in employee, with search and filtering by status, priority, and date |
+| **Tasks** | `PUT` | `/api/tasks/{id}` | `ADMIN` | Update task details, including reassignment and remarks |
 | **Tasks** | `PUT` | `/api/tasks/{id}/status` | `EMPLOYEE`, `ADMIN` | Update task status (`PENDING`, `IN_PROGRESS`, `COMPLETED`) |
 | **Tasks** | `PUT` | `/api/tasks/{id}/progress` | `EMPLOYEE`, `ADMIN` | Update task percentage progress (0-100%) |
+| **Tasks** | `DELETE` | `/api/tasks/{id}` | `ADMIN` | Delete a task |
 | **Notifications**| `GET` | `/api/notifications` | `EMPLOYEE`, `ADMIN` | Fetch list of personal notifications |
 | **Notifications**| `GET` | `/api/notifications/unread-count` | `EMPLOYEE`, `ADMIN` | Get count of unread notifications |
 | **Notifications**| `PUT` | `/api/notifications/{id}/read` | `EMPLOYEE`, `ADMIN` | Mark specific notification as read |
@@ -283,6 +391,20 @@ All accounts come pre-configured via `DatabaseSeeder.java`.
 | **Reports** | `GET` | `/api/reports/tasks/pending` | `ADMIN` | Get list of all pending tasks across projects |
 | **Reports** | `GET` | `/api/reports/pdf` | `ADMIN` | Export full organizational report as **PDF** document |
 | **Reports** | `GET` | `/api/reports/excel` | `ADMIN` | Export full organizational report as **Excel** spreadsheet |
+
+---
+
+## 🔍 Search, Filtering & Sorting
+
+The application supports search, filtering, and sorting across the major modules:
+
+| Module | Capability |
+| :--- | :--- |
+| **Employees** | Search by name/email, filter by department, sort by any column (`sortBy`, `sortDir` query params) |
+| **Projects** | Search by project name, filter by status (`ACTIVE`, `COMPLETED`, `ON_HOLD`) and priority (`HIGH`, `MEDIUM`, `LOW`) |
+| **Tasks** | Search by title, filter by status, priority, and deadline range |
+
+These filters are combinable with the existing pagination (`page`, `size`) on the relevant list endpoints.
 
 ---
 
@@ -409,12 +531,12 @@ A complete Postman collection is included in the project root:
 1. Open Postman and click **Import**.
 2. Select `Employee_Management_System.postman_collection.json`.
 3. The collection contains pre-configured requests grouped into 6 main folders:
-    * `01 — Authentication` (Admin Login, Employee Login, Register User)
-    * `02 — Employees (Admin Only)` (Get All, Get by ID, Create, Update, Delete)
-    * `03 — Projects` (List All, Get Employee Assigned Projects, Create, Update)
-    * `04 — Tasks` (Get Employee Tasks, Update Status, Update Progress)
-    * `05 — Notifications` (Get User Notifications, Unread Count, Mark Read)
-    * `06 — Project Team & Chat` (Get Chat History, Send Message, Get Team Members)
+   * `01 — Authentication` (Admin Login, Employee Login, Register User)
+   * `02 — Employees (Admin Only)` (Get All, Get by ID, Create, Update, Delete)
+   * `03 — Projects` (List All, Get Employee Assigned Projects, Create, Update)
+   * `04 — Tasks` (Get Employee Tasks, Update Status, Update Progress)
+   * `05 — Notifications` (Get User Notifications, Unread Count, Mark Read)
+   * `06 — Project Team & Chat` (Get Chat History, Send Message, Get Team Members)
 
 ---
 
